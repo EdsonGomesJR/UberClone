@@ -31,5 +31,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:16.0.4'
     implementation 'com.google.firebase:firebase-storage:16.0.4'
     //-------------------------------------------------------------\\
+
+
+    //---- MATERIAL EDIT TEXT -------- \\\
+    implementation 'com.rengwuxian.materialedittext:library:2.1.4'
+
+    //--- Calligraphy--\\
+    implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
