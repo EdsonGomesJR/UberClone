@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
@@ -59,6 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="6dp"
+            android:onClick="irParaTelaDeLogin"
             android:layout_weight="1"
             android:background="@drawable/btn_sign_in_background"
             android:text="LOGAR"
@@ -71,6 +73,7 @@
             android:layout_marginLeft="6dp"
             android:layout_weight="1"
             android:background="@drawable/btn_register_background"
+            android:onClick="irParaTelaDeCadastro"
             android:text="REGISTRAR"
             android:textColor="@color/btnRegister" />
 
