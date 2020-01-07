@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -99,8 +100,12 @@ public class MainActivity extends AppCompatActivity {
 
                 dialog.dismiss();
 
-                //checar validação
+                //setar o botão de login como desabilitado enquanto  está carregando
+                btnLogar.setEnabled(false);
 
+
+
+                //checar validação
                 if (TextUtils.isEmpty(edtMail.getText().toString())) {
 
                     Snackbar.make(rootLayout, "Por favor digite um endereço de email",
@@ -120,20 +125,27 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                final SpotsDialog carregandoDialog = new SpotsDialog(MainActivity.this);
+                carregandoDialog.show();
                 //login
                 auth.signInWithEmailAndPassword(edtMail.getText().toString(), edtSenha.getText().toString())
                         .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                             @Override
                             public void onSuccess(AuthResult authResult) {
-
+                                carregandoDialog.dismiss();
                                 startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+                                finish();
 
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        carregandoDialog.dismiss();
+
                         Snackbar.make(rootLayout, "Login Falhou: " + e.getMessage(), Snackbar.LENGTH_SHORT)
                                 .show();
+//ativando o botão de logar
+                        btnLogar.setEnabled(true);
                     }
                 });
 
