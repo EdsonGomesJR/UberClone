@@ -27,6 +27,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
+    //----GEOFIRE-------\\
+    implementation 'com.firebase:geofire-android:2.1.2'
+
     //----------------------FIREBASE--------------------- --------\\
     implementation 'com.google.firebase:firebase-auth:16.0.5'
     implementation 'com.google.firebase:firebase-database:16.0.4'
