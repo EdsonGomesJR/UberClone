@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(AuthResult authResult) {
                                 carregandoDialog.dismiss();
-                                startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+                                startActivity(new Intent(MainActivity.this, Welcome.class));
                                 finish();
 
                             }
