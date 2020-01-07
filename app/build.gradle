@@ -44,5 +44,8 @@ dependencies {
 
     implementation 'com.github.d-max:spots-dialog:0.7@aar'
 
+    implementation 'com.google.android.gms:play-services-maps:10.2.0'
+    implementation 'com.google.android.gms:play-services:10.2.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
