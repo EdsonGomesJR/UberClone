@@ -1,7 +1,10 @@
 package com.edson.uberclone;
 
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.libraries.places.api.Places;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -30,12 +33,14 @@ import com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -53,6 +58,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.text.Line;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
@@ -64,6 +75,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -103,11 +115,15 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private Handler handler;
     private LatLng startPosition, endPosition, currentPosition;
     private int index, next;
-    private Button btnGo;
-    private EditText edtPlace;
+    //private Button btnGo;
+
     private String destination;
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private Polyline blackPolyline, greyPolyline;
+
+    private PlaceAutocompleteFragment places;
+
+
     Runnable drawPathRunnable = new Runnable() {
         @Override
         public void run() {
@@ -183,6 +199,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_direction_api));
+        PlacesClient placesClient = Places.createClient(this);
+
         //init view
         location_switch = findViewById(R.id.location_switch);
         location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
@@ -199,10 +218,11 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                             .show();
 
                 } else {
-
+                    if (handler != null) {
+                        handler.removeCallbacks(drawPathRunnable);
+                    }
                     fusedLocationProviderClient.removeLocationUpdates(locationCallback);
                     mMap.clear();
-                    handler.removeCallbacks(drawPathRunnable);
                     Snackbar.make(mapFragment.getView(), "Você está OFFLINE!", Snackbar.LENGTH_SHORT)
                             .show();
                 }
@@ -211,20 +231,86 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         });
 
         polyLineList = new ArrayList<>();
-        btnGo = findViewById(R.id.btnGo);
-        edtPlace = findViewById(R.id.edtPlace);
+        // btnGo = findViewById(R.id.btnGo);
+        //  edtPlace = findViewById(R.id.place_autocomplete_fragment);
 
-        btnGo.setOnClickListener(new View.OnClickListener() {
+        //places api
+
+        if (!Places.isInitialized()) {
+
+            Places.initialize(getApplicationContext(), getResources().getString(R.string.google_direction_api));
+        }
+
+        //initialize the AutocompleteSupportFragment
+
+        AutocompleteSupportFragment autocompleteSupportFragment = (AutocompleteSupportFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
+
+        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+
+                if (location_switch.isChecked()) {
+                    destination = place.getAddress().toString();
+                    destination = destination.replace(" ", "+");
+
+                    getDirection();
+
+                } else {
+
+                    Toast.makeText(Welcome.this, "Please change your status to ONLINE", Toast.LENGTH_SHORT).show();
+                    mMap.clear();
+                }
+
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Toast.makeText(Welcome.this, "" + status.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        /** places = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+         places.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        @Override public void onPlaceSelected(Place place) {
+
+        if(location_switch.isChecked())
+        {
+        destination = place.getAddress().toString();
+        destination = destination.replace(" ","+");
+
+        getDirection();
+
+        }
+        else
+        {
+
+        Toast.makeText(Welcome.this, "Please change your status to ONLINE", Toast.LENGTH_SHORT).show();
+
+        }
+
+        }
+
+        @Override public void onError(Status status) {
+        Toast.makeText(Welcome.this, "" + status.toString(), Toast.LENGTH_SHORT).show();
+
+        }
+        });*/
+
+        /** btnGo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                destination = edtPlace.getText().toString();
+        //
+        //destination = edtPlace.getText().toString();
                 destination = destination.replace(" ", "+"); //replace space with + for fecth data
                 Log.d("Eds", destination);
 
                 getDirection();
             }
         });
-
+         */
 
         //Geo fire
         drivers = FirebaseDatabase.getInstance().getReference("Drivers");
