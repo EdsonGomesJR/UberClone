@@ -1,4 +1,4 @@
-package com.edson.uberclone.model;
+package com.edson.uberclone.Model;
 
 public class User {
     private String email, password, name, phone;

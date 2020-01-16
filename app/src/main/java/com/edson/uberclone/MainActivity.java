@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.edson.uberclone.Common.Common;
-import com.edson.uberclone.model.User;
+import com.edson.uberclone.Model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
