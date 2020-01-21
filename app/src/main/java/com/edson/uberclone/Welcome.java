@@ -4,7 +4,9 @@ package com.edson.uberclone;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edson.uberclone.Model.Token;
 import com.google.android.libraries.places.api.Places;
+
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -69,6 +71,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,7 +105,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     SupportMapFragment mapFragment;
     private LocationRequest mLocationRequest;
 
-    private Location mLastLocation;
 
     LocationCallback locationCallback;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -300,15 +303,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         });*/
 
         /** btnGo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        @Override public void onClick(View v) {
         //
         //destination = edtPlace.getText().toString();
-                destination = destination.replace(" ", "+"); //replace space with + for fecth data
-                Log.d("Eds", destination);
+        destination = destination.replace(" ", "+"); //replace space with + for fecth data
+        Log.d("Eds", destination);
 
-                getDirection();
-            }
+        getDirection();
+        }
         });
          */
 
@@ -319,11 +321,29 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         setUpLocation();
 
         mService = Common.getGoogleAPI();
+
+        updateFirebaseToken();
+    }
+
+    private void updateFirebaseToken() {
+
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        final DatabaseReference tokens = db.getReference(Common.token_tbl);
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                Token token = new Token(instanceIdResult.getToken());
+                tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .setValue(token);
+            }
+        });
+
     }
 
     private void getDirection() {
 
-        currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        currentPosition = new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude());
 
         String requestApi = null;
 
@@ -509,7 +529,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
-                    mLastLocation = location;
+                    Common.mLastLocation = location;
 
                 }
                 displayLocation();
@@ -541,13 +561,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        mLastLocation = location;
+                        Common.mLastLocation = location;
 
-                        if (mLastLocation != null) {
+                        if (Common.mLastLocation != null) {
 
                             if (location_switch.isChecked()) {
-                                final double latitude = mLastLocation.getLatitude();
-                                final double longitude = mLastLocation.getLongitude();
+                                final double latitude = Common.mLastLocation.getLatitude();
+                                final double longitude = Common.mLastLocation.getLongitude();
 
                                 //update to firebase
                                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(), new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
