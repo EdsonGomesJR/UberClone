@@ -2,24 +2,15 @@ package com.edson.uberclone.Model;
 
 public class Sender {
 
-    public Data data;
     public String to;
+    public Notification notification;
 
     public Sender() {
-
     }
 
-    public Sender(Data data, String to) {
-        this.data = data;
+    public Sender(String to, Notification notification) {
         this.to = to;
-    }
-
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
+        this.notification = notification;
     }
 
     public String getTo() {
@@ -28,5 +19,13 @@ public class Sender {
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public Notification getNotification() {
+        return notification;
+    }
+
+    public void setNotification(Notification notification) {
+        this.notification = notification;
     }
 }
