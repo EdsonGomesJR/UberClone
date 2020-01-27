@@ -68,9 +68,11 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
@@ -126,6 +128,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     private PlaceAutocompleteFragment places;
 
+    //Presence System
+    DatabaseReference onlineRef, currentUserRef;
 
     Runnable drawPathRunnable = new Runnable() {
         @Override
@@ -205,6 +209,24 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_direction_api));
         PlacesClient placesClient = Places.createClient(this);
 
+        //Presence System
+        onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
+        currentUserRef = FirebaseDatabase.getInstance().getReference(Common.driver_tbl)
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        onlineRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //We will remove value from Driver tbl when driver is disconnected
+                currentUserRef.onDisconnect().removeValue();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         //init view
         location_switch = findViewById(R.id.location_switch);
         location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
@@ -212,6 +234,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             public void onCheckedChanged(boolean isOnline) {
 
                 if (isOnline) {
+
+                    FirebaseDatabase.getInstance().goOnline(); // set connected when switch is on
 
                     buildLocationCallBack();
                     buildLocationRequest();
@@ -221,9 +245,12 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                             .show();
 
                 } else {
+
+
                     if (handler != null) {
                         handler.removeCallbacks(drawPathRunnable);
                     }
+                    FirebaseDatabase.getInstance().goOffline();//set disconnected  when switch is off
                     fusedLocationProviderClient.removeLocationUpdates(locationCallback);
                     mMap.clear();
                     Snackbar.make(mapFragment.getView(), "Você está OFFLINE!", Snackbar.LENGTH_SHORT)
