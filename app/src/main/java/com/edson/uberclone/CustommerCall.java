@@ -7,11 +7,19 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.edson.uberclone.Common.Common;
+import com.edson.uberclone.Model.FCMResponse;
+import com.edson.uberclone.Model.Notification;
+import com.edson.uberclone.Model.Sender;
+import com.edson.uberclone.Model.Token;
 import com.edson.uberclone.Remote.IFCMService;
 import com.edson.uberclone.Remote.IGoogleAPI;
 import com.google.android.gms.maps.CameraUpdate;
@@ -39,6 +47,9 @@ public class CustommerCall extends AppCompatActivity {
     TextView txtTime, txtAddress, txtDistance;
     MediaPlayer mediaPlayer;
     IGoogleAPI mService;
+    Button btnAccept, btnDecline;
+    String customerId;
+    IFCMService mIFCService;
 
 
     @Override
@@ -47,22 +58,70 @@ public class CustommerCall extends AppCompatActivity {
         setContentView(R.layout.activity_custommer_call);
 
         mService = Common.getGoogleAPI();
+        mIFCService = Common.getFCMService();
 
         //init view
         txtTime = findViewById(R.id.txtTime);
         txtAddress = findViewById(R.id.txtAddress);
         txtDistance = findViewById(R.id.txtDistance);
 
+        btnAccept = findViewById(R.id.btnAccept);
+        btnDecline = findViewById(R.id.btnDecline);
+
+        btnDecline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!TextUtils.isEmpty(customerId))
+
+                    cancelBooking(customerId);
+
+            }
+        });
+
         mediaPlayer = MediaPlayer.create(this, R.raw.ringtone);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
 
         if (getIntent() != null) {
 
             double lat = getIntent().getDoubleExtra("lat", -1.0);
             double lng = getIntent().getDoubleExtra("lng", -1.0);
+            customerId = getIntent().getStringExtra("customer");
 
             //just copy getDirection from Welcome
             getDirection(lat, lng);
         }
+
+    }
+
+    private void cancelBooking(String customerId) {
+
+        Token token = new Token(customerId);
+
+        Notification notification = new Notification("Notice!", "Driver has cancelled your request");
+        Sender sender = new Sender(token.getToken(), notification);
+        Log.d("notification", "cancelBooking: " + notification);
+        Log.d("sender", "cancelBooking: " + sender);
+
+
+        mIFCService.sendMessage(sender)
+                .enqueue(new Callback<FCMResponse>() {
+                    @Override
+                    public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                        if (response.body().success == 1) {
+
+                            Toast.makeText(CustommerCall.this, "Cancelled", Toast.LENGTH_SHORT).show();
+                            finish();
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<FCMResponse> call, Throwable t) {
+
+                    }
+                });
 
     }
 

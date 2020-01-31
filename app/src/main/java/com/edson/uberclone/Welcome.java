@@ -126,7 +126,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private Polyline blackPolyline, greyPolyline;
 
-    private PlaceAutocompleteFragment places;
 
     //Presence System
     DatabaseReference onlineRef, currentUserRef;
