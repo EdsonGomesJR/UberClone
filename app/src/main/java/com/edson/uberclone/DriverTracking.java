@@ -4,12 +4,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.animation.LinearInterpolator;
+import android.widget.Toast;
 
 import com.edson.uberclone.Common.Common;
 import com.edson.uberclone.Remote.IGoogleAPI;
@@ -20,6 +26,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -27,12 +34,28 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DriverTracking extends FragmentActivity implements OnMapReadyCallback {
 
@@ -48,6 +71,10 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
     private IGoogleAPI mService;
     private Circle riderMarker;
     private Marker driverMarker;
+    private Polyline direction;
+    private LatLng startPosition, endPosition, currentPosition;
+    private String destination;
+
 
 
     @Override
@@ -121,7 +148,9 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
                                     .icon(BitmapDescriptorFactory.defaultMarker()));
 
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 17.0f));
-
+                            if (direction != null)
+                                direction.remove(); // remove old direction
+                            getDireciton();
                         } else {
 
                             Log.d("ERROR", "cannot get your location: ");
@@ -130,6 +159,52 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
                 });
 
 
+    }
+
+    private void getDireciton() {
+
+        currentPosition = new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude());
+
+        String requestApi = null;
+
+        try {
+
+            requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "mode=driving&" +
+                    "transit_routing_preference=less_driving&" +
+                    "origin=" + currentPosition.latitude + "," + currentPosition.longitude + "&" +
+                    "destination=" + riderLat + "," + riderLng + "&" +
+                    "key=" + getResources().getString(R.string.google_direction_api);
+            Log.d("Eds", requestApi);//print url for debug
+
+            mService.getPath(requestApi)
+                    .enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+
+                            try {
+
+                                new ParserTask().execute(response.body().toString());
+
+
+                            } catch (Exception e) {
+
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+
+                            Toast.makeText(DriverTracking.this, "" + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
     }
 
     private void buildLocationRequest() {
@@ -157,5 +232,32 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
         buildLocationCallBack();
         fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
 
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        ProgressDialog mDialog = new ProgressDialog(DriverTracking.this);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDialog.setMessage("Please wait....");
+            mDialog.show();
+        }
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... strings) {
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+            try {
+
+                jObject = new JSONObject(strings[0]);
+                DirectionJSONParser parser = new DirectionJSONParser();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }
