@@ -126,6 +126,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private Polyline blackPolyline, greyPolyline;
 
+    private IGoogleAPI mService;
+
 
     //Presence System
     DatabaseReference onlineRef, currentUserRef;
@@ -172,7 +174,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             handler.postDelayed(this, 3000);
         }
     };
-    private IGoogleAPI mService;
+
 
     private float getBearing(LatLng startPosition, LatLng endPosition) {
         double lat = Math.abs(startPosition.latitude - endPosition.latitude);
