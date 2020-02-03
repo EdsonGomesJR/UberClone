@@ -3,6 +3,7 @@ package com.edson.uberclone;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ public class CustommerCall extends AppCompatActivity {
     Button btnAccept, btnDecline;
     String customerId;
     IFCMService mIFCService;
+    double lat, lng;
 
 
     @Override
@@ -68,6 +70,16 @@ public class CustommerCall extends AppCompatActivity {
         btnAccept = findViewById(R.id.btnAccept);
         btnDecline = findViewById(R.id.btnDecline);
 
+        btnAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CustommerCall.this, DriverTracking.class);
+                //send custommer location to the new activity
+                intent.putExtra("lat", lat);
+                intent.putExtra("lng", lng);
+            }
+        });
+
         btnDecline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,8 +96,8 @@ public class CustommerCall extends AppCompatActivity {
 
         if (getIntent() != null) {
 
-            double lat = getIntent().getDoubleExtra("lat", -1.0);
-            double lng = getIntent().getDoubleExtra("lng", -1.0);
+            lat = getIntent().getDoubleExtra("lat", -1.0);
+            lng = getIntent().getDoubleExtra("lng", -1.0);
             customerId = getIntent().getStringExtra("customer");
 
             //just copy getDirection from Welcome
