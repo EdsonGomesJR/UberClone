@@ -18,9 +18,17 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import com.edson.uberclone.Common.Common;
+import com.edson.uberclone.Helper.DirectionJSONParser;
+import com.edson.uberclone.Model.FCMResponse;
+import com.edson.uberclone.Model.Notification;
+import com.edson.uberclone.Model.Sender;
+import com.edson.uberclone.Model.Token;
+import com.edson.uberclone.Remote.IFCMService;
 import com.edson.uberclone.Remote.IGoogleAPI;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -45,11 +53,13 @@ import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -74,6 +84,10 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
     private Polyline direction;
     private LatLng startPosition, endPosition, currentPosition;
     private String destination;
+    IFCMService mFCMService;
+    GeoFire geoFire;
+
+    String customerId;
 
 
 
@@ -92,7 +106,12 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
 
             riderLat = getIntent().getDoubleExtra("lat", -1.0);
             riderLng = getIntent().getDoubleExtra("lng", -1.0);
+            customerId = getIntent().getStringExtra("customerId");
         }
+
+        mService = Common.getGoogleAPI();
+        mFCMService = Common.getFCMService();
+
 
         setUpLocation();
     }
@@ -223,15 +242,77 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
 
         riderMarker = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(riderLat, riderLng))
-                .radius(10)
+                .radius(50) //radius is 50m
                 .strokeColor(Color.BLUE)
                 .fillColor(0x220000FF)
                 .strokeWidth(5.0f));
+
+        //create Geo fencing with radius 50
+
+        geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference(Common.driver_tbl));
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(riderLat, riderLng), 0.05f);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+
+                //we willl ned rider ID to send notification
+                //so we'll pass it from previous activiy (CustommerCall)
+                sendArrivedNotification(customerId);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+
 
         buildLocationRequest();
         buildLocationCallBack();
         fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
 
+    }
+
+    private void sendArrivedNotification(String customerId) {
+
+        Token token = new Token();
+        //we will send this notification with title "Arrived" and body this string
+        Notification notification = new Notification("Arrived", String.format(
+                "The driver has arrived at your location",
+                Common.currentUser.getName()
+        ));
+
+        Sender sender = new Sender(token.getToken(), notification);
+
+        mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
+            @Override
+            public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                if (response.body().success != 1) {
+
+                    Toast.makeText(DriverTracking.this, "Failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FCMResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
@@ -254,10 +335,48 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
                 jObject = new JSONObject(strings[0]);
                 DirectionJSONParser parser = new DirectionJSONParser();
 
+                routes = parser.parse(jObject);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
+            return routes;
+
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+            mDialog.dismiss();
+
+            ArrayList points = null;
+            PolylineOptions polylineOptions = null;
+
+            for (int i = 0; i < lists.size(); i++) {
+
+                points = new ArrayList();
+                polylineOptions = new PolylineOptions();
+
+                List<HashMap<String, String>> path = lists.get(i);
+
+                for (int j = 0; j < path.size(); j++) {
+
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+
+                }
+                polylineOptions.addAll(points);
+                polylineOptions.width(10);
+                polylineOptions.color(Color.RED);
+                polylineOptions.geodesic(true);
+            }
+
+            direction = mMap.addPolyline(polylineOptions);
         }
     }
 }

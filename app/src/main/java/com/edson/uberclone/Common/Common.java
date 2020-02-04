@@ -2,6 +2,7 @@ package com.edson.uberclone.Common;
 
 import android.location.Location;
 
+import com.edson.uberclone.Model.User;
 import com.edson.uberclone.Remote.FCMClient;
 import com.edson.uberclone.Remote.IFCMService;
 import com.edson.uberclone.Remote.IGoogleAPI;
@@ -16,6 +17,8 @@ public class Common {
     public static final String pickup_request_tbl = "PickupRequest";
     public static final String token_tbl = "Tokens";
     public static final String fcmURL = "https://fcm.googleapis.com";
+
+    public static User currentUser;
 
 
     public static final String baseURL = "https://maps.googleapis.com";

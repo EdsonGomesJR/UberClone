@@ -77,6 +77,8 @@ public class CustommerCall extends AppCompatActivity {
                 //send custommer location to the new activity
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
+                intent.putExtra("customerId", customerId);
+                startActivity(intent);
             }
         });
 
