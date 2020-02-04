@@ -290,12 +290,12 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
 
     private void sendArrivedNotification(String customerId) {
 
-        Token token = new Token();
+        Token token = new Token(customerId);
         //we will send this notification with title "Arrived" and body this string
         Notification notification = new Notification("Arrived", String.format(
-                "The driver has arrived at your location",
-                Common.currentUser.getName()
-        ));
+                "The driver %s has arrived at your location",
+                Common.currentUser.getName()));
+        Log.d("user", "sendArrivedNotification: " + Common.currentUser.getName());
 
         Sender sender = new Sender(token.getToken(), notification);
 
