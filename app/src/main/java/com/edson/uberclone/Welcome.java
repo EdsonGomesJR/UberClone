@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edson.uberclone.Model.Token;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.libraries.places.api.Places;
 
 import androidx.core.app.ActivityCompat;
@@ -13,6 +14,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -605,6 +607,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                                         if (mCurrent != null)
                                             mCurrent.remove(); //remove o marcador que ja esta
                                         mCurrent = mMap.addMarker(new MarkerOptions()
+                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
                                                 .position(new LatLng(latitude, longitude))
                                                 .title("Você"));
 
@@ -657,12 +660,26 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+
+        try {
+            boolean isSuccess = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.uber_style_map)
+            );
+
+            if (!isSuccess) {
+                Log.e("Error", "Failed to load map");
+            }
+        } catch (Resources.NotFoundException ex) {
+            ex.printStackTrace();
+        }
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setTrafficEnabled(false);
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
 
         buildLocationRequest();
         buildLocationCallBack();
