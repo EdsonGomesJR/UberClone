@@ -20,6 +20,16 @@ public class Common {
 
     public static User currentUser;
 
+    public static double base_fare = 2.55; //base uber at newyork
+    private static double time_rate = 0.35;
+    private static double distance_rate = 1.75;
+
+    public static double formulaPrice(double km, double min) {
+
+        return base_fare + (distance_rate * km) + (time_rate * min);
+    }
+
+
 
     public static final String baseURL = "https://maps.googleapis.com";
     public static Location mLastLocation = null;
