@@ -36,21 +36,21 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/txt_rider_app"
+        android:id="@+id/txt_forgot_pwd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        android:text="PROCURANDO PELO APP DE MOTORISTA?"
+        android:text="ESQUECEU A SENHA? CLIQUE AQUI!"
         android:textAlignment="center"
         android:textColor="@color/bottomText"></TextView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/txt_rider_app"
+        android:layout_above="@id/txt_forgot_pwd"
         android:layout_margin="16dp"
         android:orientation="horizontal"
         android:weightSum="2">
