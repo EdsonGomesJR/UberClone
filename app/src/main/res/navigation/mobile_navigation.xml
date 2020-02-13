@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_send">
+
+    <fragment
+        android:id="@+id/nav_trip_history"
+        android:name="com.edson.uberclone.ui.home.HomeFragment"
+        android:label="Trip History"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_way_bill"
+        android:name="com.edson.uberclone.ui.gallery.GalleryFragment"
+        android:label="WAYBILL"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/nav_help"
+        android:name="com.edson.uberclone.ui.slideshow.SlideshowFragment"
+        android:label="HELP"
+        tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.edson.uberclone.ui.tools.ToolsFragment"
+        android:label="SETTINGS"
+        tools:layout="@layout/fragment_tools" />
+
+    <fragment
+        android:id="@+id/nav_signout"
+        android:name="com.edson.uberclone.ui.signout.SignOutFragment"
+        android:label="Sign Out"
+        tools:layout="@layout/fragment_signout" />
+
+    <fragment
+        android:id="@+id/nav_send"
+        android:name="com.edson.uberclone.ui.send.SendFragment"
+        android:label="Driver Home"
+        tools:layout="@layout/fragment_send" />
+
+    <fragment
+        android:id="@+id/placeholder"
+        android:name="androidx.fragment.app.Fragment" />
+
+</navigation>
