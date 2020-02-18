@@ -9,7 +9,7 @@
     tools:openDrawer="start">
 
     <include
-        layout="@layout/app_bar_driver_home"
+        layout="@layout/app_bar_nav_home_drawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -18,12 +18,12 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#222231"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_driver_home"
-
+        android:background="#222231"
+        app:headerLayout="@layout/nav_header_nav_home_drawer"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:menu="@menu/activity_driver_home_drawer" />
+        app:menu="@menu/activity_nav_home_drawer_drawer" />
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

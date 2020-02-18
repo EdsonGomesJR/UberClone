@@ -3,46 +3,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_send">
+    app:startDestination="@+id/driverHomeFragment">
+
+    <fragment
+        android:id="@+id/nav_change_pwd"
+        android:name="com.edson.uberclone.ui.change_pwd.ChangePwdFragment"
+        android:label="Change Password"
+        tools:layout="@layout/fragment_change_pwd" />
 
     <fragment
         android:id="@+id/nav_trip_history"
-        android:name="com.edson.uberclone.ui.home.HomeFragment"
+        android:name="com.edson.uberclone.ui.trip_history.GalleryFragment"
         android:label="Trip History"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_trip_history" />
 
     <fragment
-        android:id="@+id/nav_way_bill"
-        android:name="com.edson.uberclone.ui.gallery.GalleryFragment"
-        android:label="WAYBILL"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_waybill"
+        android:name="com.edson.uberclone.ui.waybill.SlideshowFragment"
+        android:label="WayBill"
+        tools:layout="@layout/fragment_waybill" />
 
     <fragment
         android:id="@+id/nav_help"
-        android:name="com.edson.uberclone.ui.slideshow.SlideshowFragment"
-        android:label="HELP"
-        tools:layout="@layout/fragment_slideshow" />
+        android:name="com.edson.uberclone.ui.help.ToolsFragment"
+        android:label="Help"
+        tools:layout="@layout/fragment_help" />
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.edson.uberclone.ui.tools.ToolsFragment"
-        android:label="SETTINGS"
-        tools:layout="@layout/fragment_tools" />
+        android:name="com.edson.uberclone.ui.share.ShareFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
 
     <fragment
-        android:id="@+id/nav_signout"
-        android:name="com.edson.uberclone.ui.signout.SignOutFragment"
+        android:id="@+id/nav_sign_out"
+        android:name="com.edson.uberclone.ui.sign_out.SignOutFragment"
         android:label="Sign Out"
-        tools:layout="@layout/fragment_signout" />
-
+        tools:layout="@layout/fragment_sign_out" />
     <fragment
-        android:id="@+id/nav_send"
-        android:name="com.edson.uberclone.ui.send.SendFragment"
+        android:id="@+id/driverHomeFragment"
+        android:name="com.edson.uberclone.ui.main.DriverHomeFragment"
         android:label="Driver Home"
-        tools:layout="@layout/fragment_send" />
-
+        tools:layout="@layout/fragment_driver_home" />
     <fragment
-        android:id="@+id/placeholder"
-        android:name="androidx.fragment.app.Fragment" />
-
+        android:id="@+id/nav_update_info"
+        android:name="com.edson.uberclone.ui.updateinfo.UpdateInfoFragment"
+        android:label="UpdateInfoFragment" />
 </navigation>

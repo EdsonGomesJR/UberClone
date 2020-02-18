@@ -18,8 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".DriverHome"
-            android:label="@string/title_activity_driver_home"
+            android:name=".NavHomeDrawer"
+            android:label="@string/title_activity_nav_home_drawer"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

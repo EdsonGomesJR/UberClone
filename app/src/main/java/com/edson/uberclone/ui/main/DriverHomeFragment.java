@@ -1,4 +1,5 @@
-package com.edson.uberclone;
+package com.edson.uberclone.ui.main;
+
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -8,9 +9,24 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.Toast;
+
 import com.edson.uberclone.Common.Common;
 import com.edson.uberclone.Model.Token;
+import com.edson.uberclone.R;
 import com.edson.uberclone.Remote.IGoogleAPI;
+import com.edson.uberclone.Welcome;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch;
@@ -23,6 +39,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -43,20 +60,6 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
-
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -65,16 +68,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.Menu;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,12 +81,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DriverHome extends AppCompatActivity implements OnMapReadyCallback {
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class DriverHomeFragment extends Fragment {
 
     private static final int MY_PERMISSION_REQUEST_CODE = 7000;
-    private static final int PLAY_SERVICE_RES_REQUEST = 70001;
 
     //play services
+    private static final int PLAY_SERVICE_RES_REQUEST = 70001;
     private static int UPDATE_INTERVAL = 5000;
     private static int FATEST_INTERVAL = 3000;
     private static int DISPLACEMENT = 10;
@@ -106,7 +102,6 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
     FusedLocationProviderClient fusedLocationProviderClient;
     //Presence System
     DatabaseReference onlineRef, currentUserRef;
-    private AppBarConfiguration mAppBarConfiguration;
     private GoogleMap mMap;
     private LocationRequest mLocationRequest;
     //car animation
@@ -165,6 +160,10 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
     private Polyline blackPolyline, greyPolyline;
     private IGoogleAPI mService;
 
+    public DriverHomeFragment() {
+        // Required empty public constructor
+    }
+
     private float getBearing(LatLng startPosition, LatLng endPosition) {
         double lat = Math.abs(startPosition.latitude - endPosition.latitude);
         double lng = Math.abs(startPosition.longitude - endPosition.longitude);
@@ -185,42 +184,49 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
         return -1;
     }
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_driver_home);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_driver_home, container, false);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        // toolbar.setTitle("DRIVER HOME");
-        setSupportActionBar(toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph())
-                .setDrawerLayout(drawer)
-                .build();
-
-
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
 
-        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_direction_api));
-        PlacesClient placesClient = Places.createClient(this);
+                try {
+                    boolean isSuccess = googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.uber_style_map)
+                    );
+
+                    if (!isSuccess) {
+                        Log.e("Error", "Failed to load map");
+                    }
+                } catch (Resources.NotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                mMap = googleMap;
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                mMap.setTrafficEnabled(false);
+                mMap.setIndoorEnabled(false);
+                mMap.setBuildingsEnabled(false);
+                mMap.getUiSettings().setZoomControlsEnabled(true);
+
+
+                buildLocationRequest();
+                buildLocationCallBack();
+                fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
+            }
+        });
+
+        Places.initialize(getContext(), getResources().getString(R.string.google_direction_api));
+        PlacesClient placesClient = Places.createClient(getContext());
 
         //Presence System
         onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
@@ -241,7 +247,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
         });
 
         //init view
-        location_switch = findViewById(R.id.location_switch);
+        location_switch = view.findViewById(R.id.location_switch);
         location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(boolean isOnline) {
@@ -281,12 +287,12 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
 
         if (!Places.isInitialized()) {
 
-            Places.initialize(getApplicationContext(), getResources().getString(R.string.google_direction_api));
+            Places.initialize(getContext(), getResources().getString(R.string.google_direction_api));
         }
 
         //initialize the AutocompleteSupportFragment
 
-        AutocompleteSupportFragment autocompleteSupportFragment = (AutocompleteSupportFragment) getSupportFragmentManager()
+        AutocompleteSupportFragment autocompleteSupportFragment = (AutocompleteSupportFragment) getChildFragmentManager()
                 .findFragmentById(R.id.place_autocomplete_fragment);
 
         autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
@@ -303,7 +309,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
 
                 } else {
 
-                    Toast.makeText(DriverHome.this, "Please change your status to ONLINE", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Please change your status to ONLINE", Toast.LENGTH_SHORT).show();
                     mMap.clear();
                 }
 
@@ -311,9 +317,48 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
 
             @Override
             public void onError(@NonNull Status status) {
-                Toast.makeText(DriverHome.this, "" + status.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "" + status.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+
+        /** places = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+         places.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        @Override public void onPlaceSelected(Place place) {
+
+        if(location_switch.isChecked())
+        {
+        destination = place.getAddress().toString();
+        destination = destination.replace(" ","+");
+
+        getDirection();
+
+        }
+        else
+        {
+
+        Toast.makeText(Welcome.this, "Please change your status to ONLINE", Toast.LENGTH_SHORT).show();
+
+        }
+
+        }
+
+        @Override public void onError(Status status) {
+        Toast.makeText(Welcome.this, "" + status.toString(), Toast.LENGTH_SHORT).show();
+
+        }
+        });*/
+
+        /** btnGo.setOnClickListener(new View.OnClickListener() {
+        @Override public void onClick(View v) {
+        //
+        //destination = edtPlace.getText().toString();
+        destination = destination.replace(" ", "+"); //replace space with + for fecth data
+        Log.d("Eds", destination);
+
+        getDirection();
+        }
+        });
+         */
 
         //Geo fire
         drivers = FirebaseDatabase.getInstance().getReference(Common.driver_tbl);
@@ -324,20 +369,9 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
         mService = Common.getGoogleAPI();
 
         updateFirebaseToken();
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.driver_home, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+        return view;
     }
 
     private void updateFirebaseToken() {
@@ -498,7 +532,6 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
         return poly;
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -518,26 +551,6 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
 
     }
 
-
-    private void setUpLocation() {
-
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                )) {
-            //request Runtime permission
-            ActivityCompat.requestPermissions(this, new String[]{
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSION_REQUEST_CODE);
-        } else {
-
-            buildLocationRequest();
-            buildLocationCallBack();
-            if (location_switch.isChecked())
-                displayLocation();
-        }
-    }
 
     private void buildLocationCallBack() {
         locationCallback = new LocationCallback() {
@@ -561,12 +574,11 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
         mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
     }
 
-
     private void displayLocation() {
 
-        if (ActivityCompat.checkSelfPermission(this,
+        if (ActivityCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 )) {
 
             return;
@@ -615,59 +627,25 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback 
 
     }
 
-    private void rotateMarker(final Marker mCurrent, final float i, GoogleMap mMap) {
+    private void setUpLocation() {
 
-        final Handler handler = new Handler();
-        final long start = SystemClock.uptimeMillis();
-        final float startRotation = mCurrent.getRotation();
-        final long duration = 1500;
+        if (ActivityCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                )) {
+            //request Runtime permission
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSION_REQUEST_CODE);
+        } else {
 
-        final Interpolator interpolator = new LinearInterpolator();
-
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                long elapsed = SystemClock.uptimeMillis() - start;
-                float t = interpolator.getInterpolation((float) elapsed / duration);
-                float rot = t * i + (1 - t) * startRotation;
-                mCurrent.setRotation(-rot > 180 ? rot / 2 : rot);
-
-                if (t < 1.0) {
-
-                    handler.postDelayed(this, 16);
-                }
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-        try {
-            boolean isSuccess = googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(this, R.raw.uber_style_map)
-            );
-
-            if (!isSuccess) {
-                Log.e("Error", "Failed to load map");
-            }
-        } catch (Resources.NotFoundException ex) {
-            ex.printStackTrace();
+            buildLocationRequest();
+            buildLocationCallBack();
+            if (location_switch.isChecked())
+                displayLocation();
         }
-        mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        mMap.setTrafficEnabled(false);
-        mMap.setIndoorEnabled(false);
-        mMap.setBuildingsEnabled(false);
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-
-
-        buildLocationRequest();
-        buildLocationCallBack();
-        fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper());
-
-
     }
+
+
 }

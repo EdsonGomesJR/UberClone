@@ -1,14 +1,14 @@
-package com.edson.uberclone.ui.signout;
+package com.edson.uberclone.ui.share;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class SignOutViewModel extends ViewModel {
+public class ShareViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public SignOutViewModel() {
+    public ShareViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is share fragment");
     }

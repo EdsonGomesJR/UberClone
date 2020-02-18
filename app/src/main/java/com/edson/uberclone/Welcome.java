@@ -599,6 +599,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                                 final double latitude = Common.mLastLocation.getLatitude();
                                 final double longitude = Common.mLastLocation.getLongitude();
 
+
                                 //update to firebase
                                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(), new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
                                     @Override

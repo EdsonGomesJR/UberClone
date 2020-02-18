@@ -1,4 +1,4 @@
-package com.edson.uberclone.ui.tools;
+package com.edson.uberclone.ui.help;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
