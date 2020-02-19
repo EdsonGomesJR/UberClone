@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -63,11 +64,16 @@ public class NavHomeDrawer extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         View navigationHeaderView = navigationView.getHeaderView(0);
+
+
         TextView txtName = navigationHeaderView.findViewById(R.id.txtDriverName);
         CircleImageView imageAvatar = navigationHeaderView.findViewById(R.id.image_avatar);
+        TextView txtStars = navigationHeaderView.findViewById(R.id.txtStars);
+        Log.e("txtStars", "onCreate: " + Common.currentUser.getRates());
 
 
         txtName.setText(Common.currentUser.getName()); //we can retrieve this info from Common.currentUser, cuz in Main activity, after login, we've set this data
+        txtStars.setText(Common.currentUser.getRates());
 
         //But with Avatar, we just check it with null or empty
         if (Common.currentUser.getAvatarUrl() != null && !TextUtils.isEmpty(Common.currentUser.getAvatarUrl())) {

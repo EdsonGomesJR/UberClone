@@ -79,6 +79,7 @@ public class CustommerCall extends AppCompatActivity {
                 intent.putExtra("lng", lng);
                 intent.putExtra("customerId", customerId);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -88,6 +89,7 @@ public class CustommerCall extends AppCompatActivity {
                 if (!TextUtils.isEmpty(customerId))
 
                     cancelBooking(customerId);
+
 
             }
         });
