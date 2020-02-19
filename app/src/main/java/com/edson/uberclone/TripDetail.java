@@ -2,10 +2,12 @@ package com.edson.uberclone;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import com.edson.uberclone.Common.Common;
+import com.edson.uberclone.ui.main.DriverHomeFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,6 +44,14 @@ public class TripDetail extends FragmentActivity implements OnMapReadyCallback {
         txtFrom = findViewById(R.id.txtFrom);
         txtTo = findViewById(R.id.txtTo);
         txtTime = findViewById(R.id.txtTime);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(this, DriverHomeFragment.class);
+        startActivity(intent);
+        finish();
     }
 
 
