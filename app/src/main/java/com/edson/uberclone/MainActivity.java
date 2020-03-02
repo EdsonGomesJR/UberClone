@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import dmax.dialog.SpotsDialog;
+import io.paperdb.Paper;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -57,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //init PaperDB
+        Paper.init(this);
+
         //config o calligraphy para alterar a font do texto *OBS tem que estar antes do setContentView
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/Arkhip_font.ttf")
@@ -73,8 +77,72 @@ public class MainActivity extends AppCompatActivity {
 
         inicializarWidgets();
 
+        //Auto Login system
+        String user = Paper.book().read(Common.user_field);
+        String pwd = Paper.book().read(Common.pwd_field);
+
+        if (user != null && pwd != null) {
+
+            if (!TextUtils.isEmpty((user)) &&
+                    !TextUtils.isEmpty((pwd))) {
+
+                autoLoging(user, pwd);
+
+            }
+
+        }
+
 
     }
+
+    private void autoLoging(String user, String pwd) {
+
+
+        final SpotsDialog carregandoDialog = new SpotsDialog(MainActivity.this);
+        carregandoDialog.show();
+        //login
+        auth.signInWithEmailAndPassword(user, pwd)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        carregandoDialog.dismiss();
+                        FirebaseDatabase.getInstance().getReference(Common.user_driver_tbl)
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        Common.currentUser = dataSnapshot.getValue(User.class);
+                                        startActivity(new Intent(MainActivity.this, NavHomeDrawer.class));
+                                        carregandoDialog.dismiss();
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                carregandoDialog.dismiss();
+
+                Snackbar.make(rootLayout, "Login Falhou: " + e.getMessage(), Snackbar.LENGTH_SHORT)
+                        .show();
+//ativando o botão de logar
+                btnLogar.setEnabled(true);
+            }
+        });
+
+    }
+
+
+
+
+
 
     //evento de clique
     public void irParaTelaDeCadastro(View view) {
@@ -114,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
                 btnLogar.setEnabled(false);
 
 
-
                 //checar validação
                 if (TextUtils.isEmpty(edtMail.getText().toString())) {
 
@@ -142,13 +209,18 @@ public class MainActivity extends AppCompatActivity {
                         .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                             @Override
                             public void onSuccess(AuthResult authResult) {
-                                carregandoDialog.dismiss();
+
                                 FirebaseDatabase.getInstance().getReference(Common.user_driver_tbl)
                                         .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                         .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                //save values
+                                                Paper.book().write(Common.user_field, edtMail.getText().toString());
+                                                Paper.book().write(Common.pwd_field, edtSenha.getText().toString());
+
                                                 Common.currentUser = dataSnapshot.getValue(User.class);
+                                                carregandoDialog.dismiss();
                                                 startActivity(new Intent(MainActivity.this, NavHomeDrawer.class));
                                                 finish();
                                             }

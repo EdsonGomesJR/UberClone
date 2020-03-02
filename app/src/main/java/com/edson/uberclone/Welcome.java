@@ -27,6 +27,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.edson.uberclone.Common.Common;
@@ -113,6 +114,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     LocationCallback locationCallback;
     FusedLocationProviderClient fusedLocationProviderClient;
 
+    private ImageView imgClick;
 
     //car animation
     private List<LatLng> polyLineList;
@@ -206,6 +208,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        imgClick = findViewById(R.id.imgClick);
+        imgClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(Welcome.this, "Crick", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 

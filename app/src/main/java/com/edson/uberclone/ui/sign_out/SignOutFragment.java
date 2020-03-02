@@ -17,6 +17,8 @@ import com.edson.uberclone.MainActivity;
 import com.edson.uberclone.R;
 import com.google.firebase.auth.FirebaseAuth;
 
+import io.paperdb.Paper;
+
 public class SignOutFragment extends Fragment {
 
 
@@ -24,6 +26,9 @@ public class SignOutFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.fragment_sign_out, container, false);
+
+        Paper.init(getActivity());
+        Paper.book().destroy();
 
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(getActivity(), MainActivity.class);

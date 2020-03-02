@@ -52,6 +52,10 @@ dependencies {
 
     //-------------------------------------------------------------\\
 
+    //---paperdb---\\
+
+    implementation 'io.paperdb:paperdb:2.6'
+
     //---PICASSO--\\
 
     implementation 'com.squareup.picasso:picasso:2.5.2'
