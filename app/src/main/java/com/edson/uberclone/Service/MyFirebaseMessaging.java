@@ -11,25 +11,34 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MyFirebaseMessaging extends FirebaseMessagingService {
 
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        //because i will send the firebase message with contain lat and lng from Rider app
-        //so i need convert message to LatLng
-        LatLng customer_location = new Gson().fromJson(remoteMessage.getNotification().getBody(), LatLng.class);
 
-        Intent intent = new Intent(getBaseContext(), CustommerCall.class);
-        intent.putExtra("lat", customer_location.latitude);
-        intent.putExtra("lng", customer_location.longitude);
-        intent.putExtra("customer", remoteMessage.getNotification().getTitle());
-        Log.d("customer", "onMessageReceived: Title " + remoteMessage.getNotification().getTitle());
-        Log.d("customer", "onMessageReceived: Body" + remoteMessage.getNotification().getBody());
+        if (remoteMessage.getData() != null) {
 
-        startActivity(intent);
+            Map<String, String> data = new HashMap<>();
+            String customer = data.get("customer");
+            String lat = data.get("lat");
+            String lng = data.get("lng");
+            //because i will send the firebase message with contain lat and lng from Rider app
+            //so i need convert message to LatLng
+
+
+            Intent intent = new Intent(getBaseContext(), CustommerCall.class);
+            intent.putExtra("lat", lat);
+            intent.putExtra("lng", lng);
+            intent.putExtra("customer", customer);
+
+
+            startActivity(intent);
+        }
+
     }
-
-
 }

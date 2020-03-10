@@ -4,7 +4,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.animation.ValueAnimator;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,19 +12,16 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.edson.uberclone.Common.Common;
 import com.edson.uberclone.Helper.DirectionJSONParser;
+import com.edson.uberclone.Model.DataMessage;
 import com.edson.uberclone.Model.FCMResponse;
-import com.edson.uberclone.Model.Notification;
-import com.edson.uberclone.Model.Sender;
 import com.edson.uberclone.Model.Token;
 import com.edson.uberclone.Remote.IFCMService;
 import com.edson.uberclone.Remote.IGoogleAPI;
@@ -38,7 +34,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,17 +41,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -67,6 +58,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -409,14 +401,18 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
 
         Token token = new Token(customerId);
         //we will send this notification with title "Arrived" and body this string
-        Notification notification = new Notification("Arrived", String.format(
-                "The driver %s has arrived at your location",
-                Common.currentUser.getName()));
-        Log.d("user", "sendArrivedNotification: " + Common.currentUser.getName());
+//        Notification notification = new Notification("Arrived", String.format(
+//                "The driver %s has arrived at your location",
+//                Common.currentUser.getName()));
+//
+//
+//        Sender sender = new Sender(token.getToken(), notification);
+        Map<String, String> content = new HashMap<>();
+        content.put("title", "Arrived");
+        content.put("message", String.format("The driver %s has arrived at your location", Common.currentUser.getName()));
+        DataMessage dataMessage = new DataMessage(token.getToken(), content);
 
-        Sender sender = new Sender(token.getToken(), notification);
-
-        mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
+        mFCMService.sendMessage(dataMessage).enqueue(new Callback<FCMResponse>() {
             @Override
             public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
                 if (response.body().success != 1) {
@@ -436,12 +432,15 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
         //notificação quando abacar a viagem
         Token token = new Token(customerId);
         //we will send this notification with title "Arrived" and body this string
-        Notification notification = new Notification("DropOff", customerId);
-        Log.d("user", "sendArrivedNotification: " + Common.currentUser.getName());
+//        Notification notification = new Notification("DropOff", customerId);
+//        Sender sender = new Sender(token.getToken(), notification);
 
-        Sender sender = new Sender(token.getToken(), notification);
+        Map<String, String> content = new HashMap<>();
+        content.put("title", "DropOff");
+        content.put("message", customerId);
+        DataMessage dataMessage = new DataMessage(token.getToken(), content);
 
-        mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
+        mFCMService.sendMessage(dataMessage).enqueue(new Callback<FCMResponse>() {
             @Override
             public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
                 if (response.body().success != 1) {

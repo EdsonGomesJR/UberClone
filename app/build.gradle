@@ -93,5 +93,8 @@ dependencies {
     // implementation "android.arch.navigation:navigation-ui:1.0.0"
 
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
+
+    //facebook
+   // implementation 'com.facebook.android:account-kit-sdk:5.+'
 }
 apply plugin: 'com.google.gms.google-services'
