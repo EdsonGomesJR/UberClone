@@ -38,7 +38,7 @@ public class CustommerCall extends AppCompatActivity {
     Button btnAccept, btnDecline;
     String customerId;
     IFCMService mIFCService;
-    double lat, lng;
+    String lat, lng;
 
 
     @Override
@@ -87,8 +87,8 @@ public class CustommerCall extends AppCompatActivity {
 
         if (getIntent() != null) {
 
-            lat = getIntent().getDoubleExtra("lat", -1.0);
-            lng = getIntent().getDoubleExtra("lng", -1.0);
+            lat = getIntent().getStringExtra("lat");
+            lng = getIntent().getStringExtra("lng");
             customerId = getIntent().getStringExtra("customer");
 
             //just copy getDirection from Welcome
@@ -131,7 +131,7 @@ public class CustommerCall extends AppCompatActivity {
 
     }
 
-    private void getDirection(double lat, double lng) {
+    private void getDirection(String lat, String lng) {
 
 
         String requestApi = null;
@@ -205,7 +205,9 @@ public class CustommerCall extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        mediaPlayer.release();
+
+        if (mediaPlayer.isPlaying())
+            mediaPlayer.pause();
         super.onPause();
     }
 
